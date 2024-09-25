@@ -11,11 +11,11 @@ auth = Blueprint('auth',__name__)
 @auth.route('/signup',methods=['GET','POST'])
 def signUp():
     if request.method == 'POST':
-        first_name = request.form.get('firstName')
-        last_name = request.form.get('lastName')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        role = request.form.get('role')
+        first_name = request.get_json()['firstName']
+        last_name = request.get_json()['lastName']
+        email = request.get_json()['email']
+        password = request.get_json()['password']
+        role = request.get_json()['role']
         print(email)
 
         print(role)
@@ -23,20 +23,23 @@ def signUp():
         user = session.query(User).filter_by(email=email).first()
         if user:
             return jsonify({
-                "ërror": " User already existed! Please login"
+                'ok':False,
+                'ërror': " User already existed! Please login"
             })
         else:
             if not '@' in email and not '.' in email:
                 return jsonify({
-                    "error": "email is not correct!"
+                    'ok':False,
+                    'error': "email is not correct!"
                 })
             elif len(first_name) < 2 or len(last_name) < 2:
                 return jsonify({
-                    "error": "Either first name or last name is too short. "
+                    'ok':False,
+                    'error': "Either first name or last name is too short. "
                 })
             elif len(password) < 7 or not check_string(password):
                 return jsonify({
-                    "error": "either the password is less than 7 character."
+                    'error': "either the password is less than 7 character."
                 })
             else:
                 new_user = User(
@@ -54,35 +57,44 @@ def signUp():
                 # Commit the session to save the new user to the database
                 session.commit()
 
-    return jsonify({'message': 'File uploaded successfully'}),201
+    return jsonify({'message': 'File uploaded successfully','ok':True}),201
 
 # An endpoint used to login  
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+        email = request.get_json()['email']
+
+        password = request.get_json()['password']
+
+        print(request.get_json())
+
+        print(f'{email} and {password}')
 
         if not email or not password:
             return jsonify({
-                "error": "Either email or password is not provided!"
+                'ok': False,
+                'error': "Either email or password is not provided!"
             })
         else:
             user = session.query(User).filter_by(email=email).first()
       
             if not user:
                 return jsonify({
-                    "error": "user does not existed, please signup!"
+                    'ok': False,
+                    'error': "user does not existed, please signup!"
                 })
             else:
                 if check_password_hash(user.password, password):
                     login_user(user,remember=True)
 
                     return jsonify({
+                        "ok": True,
                         "message": "user logged in successfully"
                     })
                 else:
                     return jsonify({
+                        "ok": False,
                         "error": "Password or email is incorrect!"
                     })
 
