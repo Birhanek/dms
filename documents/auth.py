@@ -16,9 +16,6 @@ def signUp():
         email = request.get_json()['email']
         password = request.get_json()['password']
         role = request.get_json()['role']
-        print(email)
-
-        print(role)
 
         user = session.query(User).filter_by(email=email).first()
         if user:
