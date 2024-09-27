@@ -112,7 +112,7 @@ def login():
                     })
 
 # An endpoint user to logout from the system
-@auth.route('/logout')
+@auth.route('/logout', methods=['GET'])
 @login_required
 def logout():
     logout_user()
