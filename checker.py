@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 # To check whether a given word has at least one Upper, lower, special character and number
 def check_string(word:str):
@@ -17,3 +18,19 @@ def check_string(word:str):
     has_number = re.search(r'[\d]',word)
 
     return all([has_upper, has_lower, has_special, has_number])
+
+# To change SQLAlchemy returned object to a dictionary
+def to_dict(obj):
+    result = {}
+
+    for column in obj.__table__.columns:
+        value = getattr(obj,column.name)
+        # Check if the value is a datetime object, then format it as a string
+        if isinstance(value, datetime):
+            result[column.name] = value.isoformat()
+        else:
+            result[column.name] = value
+
+
+
+    return result

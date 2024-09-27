@@ -1,10 +1,12 @@
 from flask import Blueprint, request,jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, current_user, login_required
+import json
 # Local imports
 from .models import User
 from . import session
-from checker import check_string
+from checker import check_string, to_dict
+
 
 auth = Blueprint('auth',__name__)
 
@@ -60,21 +62,34 @@ def signUp():
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+        # From the front end accepts the back end accepts as a dictionary
         email = request.get_json()['email']
 
         password = request.get_json()['password']
 
-        print(request.get_json())
-
-        print(f'{email} and {password}')
 
         if not email or not password:
             return jsonify({
                 'ok': False,
-                'error': "Either email or password is not provided!"
+                'error': "Email or password is not provided!"
             })
         else:
             user = session.query(User).filter_by(email=email).first()
+            
+            # print(user)
+            
+            # Changes the returned object in to dictionary
+            user_dict = {
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'id':user.id,
+                'email':user.email,
+                'role':user.role
+            }
+            
+            print(user_dict)
+            # Stringfy the dictionary
+            user_json = json.dumps(user_dict)
       
             if not user:
                 return jsonify({
@@ -87,7 +102,8 @@ def login():
 
                     return jsonify({
                         "ok": True,
-                        "message": "user logged in successfully"
+                        "message": "user logged in successfully",
+                        'data': user_json
                     })
                 else:
                     return jsonify({
@@ -101,5 +117,6 @@ def login():
 def logout():
     logout_user()
     return jsonify({
-        "message": "user successfully loggedout!"
+        "message": "user successfully loggedout!",
+        "ok":True
     })
