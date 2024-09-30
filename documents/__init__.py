@@ -26,6 +26,8 @@ def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = "qjauhste563hstnckolg"
     app.config['UPLOAD_FOLDER'] = "./uploads"
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # To allow cross-origin cookies
+    app.config['SESSION_COOKIE_SECURE'] = True  # Secure cookies only for HTTPS not for localhost but in production should be changed
 
    
     #  local imports typically controllers
@@ -37,7 +39,7 @@ def create_app():
     create_database(app)
     login_manager = LoginManager()
     login_manager.init_app(app)
-    CORS(app, resources={r"/*": {"origins": "*"}},supports_credentials=True)
+    CORS(app, origins=["http://localhost:3000"],supports_credentials=True)
     #login_manager.login_view = 'auth.login'
 
     @login_manager.user_loader
