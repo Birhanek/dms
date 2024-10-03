@@ -21,6 +21,14 @@ class User(Base, UserMixin):
     audits = relationship('Audit', back_populates='user')
     permissions = relationship('Permission', back_populates='user')
 
+# Students table -> stores information about students who regeistered to be consulted
+class Student(Base):
+    __tablename__ = 'students'
+
+    student_id = Column(Integer, primary_key=True)
+    first_name = Column(String(255), nullable=False )
+    last_name = Column(String(100), nullable=False)
+
 class Document(Base):
      
      __tablename__ = 'documents'
