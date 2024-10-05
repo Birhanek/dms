@@ -17,10 +17,10 @@ class User(Base, UserMixin):
     created_at = Column(DateTime, default=datetime.now)
     last_login = Column(DateTime)
 
-    #Relationships
-    documents = relationship('Document', back_populates='uploader')
-    audits = relationship('Audit', back_populates='user')
-    permissions = relationship('Permission', back_populates='user')
+    # #Relationships
+    # documents = relationship('Document', back_populates='uploader')
+    # audits = relationship('Audit', back_populates='user')
+    # permissions = relationship('Permission', back_populates='user')
     # New
     students = relationship('Student', back_populates='user')
     consultants = relationship('Consultant',back_populates='users')
@@ -44,6 +44,7 @@ class Student(Base):
     user = relationship('User', back_populates='students')
     consult = relationship('Consultation', back_populates='student')
     payment = relationship('Payment', back_populates='students')
+    applications= relationship('Application', back_populates='students')
 
 # Tracks consultations between students and consultants.
 class Consultation(Base):
@@ -84,73 +85,118 @@ class Consultant(Base):
     # Relationship
     users = relationship('User',back_populates='consultants')
 
+# Contains information about the universities that students can apply to
 class University(Base):
+
+    __tablename__ = 'universities'
+
     id=Column(String(36), primary_key=True, default=lambda:str(uuid4()))
     name=Column(String(200), nullable=False)
+    location=Column(String(100)) # University country and city
+    website=Column(String(255))
+    description=Column(Text)
+    ranking=Column(Integer)
 
-class Document(Base):
+    # relationships
+    programs = relationship('Program', back_populates='universities')
+    applications=relationship('Application', back_populates='universities')
+
+class Program(Base):
+
+    __tablename__ = 'programs'
+
+    id=Column(String(36), primary_key=True, default=lambda:str(uuid4()))
+    university_id=Column(String(36), ForeignKey('University.id'))
+    program_name=Column(String(100))
+    program_level=Column(String(50))
+    duration=Column(Integer)
+    program_language=Column(String(50))
+    application_deadline=Column(DateTime)
+    admission_requirment=Column(Text)
+
+    # Relationships
+    universities = relationship('University', back_populates='programs')
+
+# Tracks applications submitted by students for different programs
+class Application(Base):
+
+    __tablename__ = 'applications'
+
+    id=Column(String(36), primary_key=True, default=lambda:str(uuid4()))
+    student_id = Column(String(50), ForeignKey('Student.id'))
+    university_id=Column(String(36), ForeignKey('University.id'))
+    status=Column(String(30))
+    submission_date=Column(DateTime)
+    decision_date = Column(DateTime)
+    notes = Column(Text)
+
+    # Relationship
+    students = relationship('Student', back_populates='applications')
+    universities= relationship('University', back_populates='applications')
+
+# class Document(Base):
      
-     __tablename__ = 'documents'
+#      __tablename__ = 'documents'
 
-     id = Column(Integer, primary_key=True)
-     title = Column(String(255), nullable=False)
-     filename = Column(String(255), nullable=False)
-     file_path = Column(String(255), nullable=False)
-     file_type = Column(String(50))
-     file_size = Column(BigInteger)
-     upload_date = Column(DateTime, default=datetime.utcnow)
-     uploaded_by = Column(Integer, ForeignKey('users.id'))
-     version = Column(Integer, default=1)
-     description = Column(Text)
+#      id = Column(Integer, primary_key=True)
+#      title = Column(String(255), nullable=False)
+#      filename = Column(String(255), nullable=False)
+#      file_path = Column(String(255), nullable=False)
+#      file_type = Column(String(50))
+#      file_size = Column(BigInteger)
+#      upload_date = Column(DateTime, default=datetime.utcnow)
+#      uploaded_by = Column(Integer, ForeignKey('users.id'))
+#      version = Column(Integer, default=1)
+#      description = Column(Text)
 
-     #Relationships
-     uploader = relationship('User', back_populates='documents')
-     audits = relationship('Audit', back_populates='document')
-     tags = relationship('Tag', secondary='document_tag', back_populates='documents')
-     permissions = relationship('Permission', back_populates='document')
+#      #Relationships
+#      uploader = relationship('User', back_populates='documents')
+#      audits = relationship('Audit', back_populates='document')
+#      tags = relationship('Tag', secondary='document_tag', back_populates='documents')
+#      permissions = relationship('Permission', back_populates='document')
 
-class Tag(Base):
+# class Tag(Base):
 
-    __tablename__ = 'tags'
+#     __tablename__ = 'tags'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(50), unique=True, nullable=False)
+#     id = Column(Integer, primary_key=True)
+#     name = Column(String(50), unique=True, nullable=False)
 
-    # Relationships
-    documents = relationship('Document', secondary='document_tag', back_populates='tags')
+#     # Relationships
+#     documents = relationship('Document', secondary='document_tag', back_populates='tags')
 
 
-class DocumentTag(Base):
+# class DocumentTag(Base):
 
-    __tablename__ = 'document_tag'
+#     __tablename__ = 'document_tag'
 
-    document_id = Column(Integer, ForeignKey('documents.id'), primary_key=True)
-    tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
+#     document_id = Column(Integer, ForeignKey('documents.id'), primary_key=True)
+#     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
 
-class Audit(Base):
+# class Audit(Base):
 
-    __tablename__ = 'audit'
+#     __tablename__ = 'audit'
 
-    id = Column(Integer, primary_key=True)
-    document_id = Column(Integer, ForeignKey('documents.id'))
-    action = Column(String(50), nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow)
-    performed_by = Column(Integer, ForeignKey('users.id'))
-    details = Column(Text)
+#     id = Column(Integer, primary_key=True)
+#     document_id = Column(Integer, ForeignKey('documents.id'))
+#     action = Column(String(50), nullable=False)
+#     timestamp = Column(DateTime, default=datetime.utcnow)
+#     performed_by = Column(Integer, ForeignKey('users.id'))
+#     details = Column(Text)
 
-    # Relationships
-    document = relationship('Document', back_populates='audits')
-    user = relationship('User', back_populates='audits')
+#     # Relationships
+#     document = relationship('Document', back_populates='audits')
+#     user = relationship('User', back_populates='audits')
 
-class Permission(Base):
+# class Permission(Base):
 
-    __tablename__ = 'permissions'
+#     __tablename__ = 'permissions'
 
-    id = Column(Integer, primary_key=True)
-    document_id = Column(Integer, ForeignKey('documents.id'))
-    user_id = Column(Integer, ForeignKey('users.id'))
-    access_level = Column(String(50), nullable=False)
+#     id = Column(Integer, primary_key=True)
+#     document_id = Column(Integer, ForeignKey('documents.id'))
+#     user_id = Column(Integer, ForeignKey('users.id'))
+#     access_level = Column(String(50), nullable=False)
 
-    # Relationships
-    document = relationship('Document', back_populates='permissions')
-    user = relationship('User', back_populates='permissions')
+#     # Relationships
+#     document = relationship('Document', back_populates='permissions')
+#     user = relationship('User', back_populates='permissions')
