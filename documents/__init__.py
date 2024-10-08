@@ -44,12 +44,13 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(id):
-        return session.query(User).get(int(id))
+        return session.query(User).get(str(id))
 
     return app
 
 
 def create_database (app):
     Base.metadata.create_all(engine)
+    # Base.metadata.drop_all(engine)
     print("All tables are created!")
     

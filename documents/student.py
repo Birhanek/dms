@@ -1,6 +1,6 @@
 from flask_login import login_user, logout_user, current_user, login_required
 from flask import request, Blueprint, jsonify
-
+from typing import List
 # Local imports
 from .models import Student
 from . import session
@@ -86,6 +86,53 @@ def delete_student_record(delete_id:str):
                 print(f"Error deleting student: {e}")
                 return jsonify({'error': 'Failed to delete student'}), 500
 
-          
+
+# get A student informatie
+
+@student.route('/student-info/<string:student_id>',methods=['GET'])
+@login_required
+def get_student_info(student_id:str):
+
+    existed_student: Student | None = session.query(Student).filter_by(id=student_id).first()
+
+    if existed_student:
+        return jsonify({
+            'message': f'Student information with {student_id} found.',
+            'data':existed_student,
+            'ok': True
+        })
+    else:
+        return jsonify({
+            'message': f'Student information with id: {student_id} not found.',
+            'ok': False
+            })
+# return all the students who specify their interest
+@student.route('/students-info-all/<string:random_generated_key>/', methods=['GET'])
+@login_required
+def get_all_students(random_generated_key:str):
+    """
+    From the front end we send a data /students-info-all/atystyasays-ryhj478-jshddsdsdsds/?role=Admin
+
+    Returns all the students who create an account in our system
+    """
+    role:str = request.args.get('role')
+
+    match role.lower():
+        case 'admin':
+              existed_students: List[Student] | None = session.query(Student).all()
+              print(existed_students)
+              return jsonify({
+                   'message': 'All students',
+                   'ok':True,
+                   'data': existed_students
+              })
+        case _:
+              return jsonify({
+                   'message':'You have no access to get student data',
+                   'ok': False
+              })
+              
+
+
 
 

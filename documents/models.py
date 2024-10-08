@@ -48,6 +48,8 @@ class Student(Base):
 
 # Tracks consultations between students and consultants.
 class Consultation(Base):
+
+    __tablename__ = 'consultations'
     id = Column(String(50), primary_key=True, default=lambda: str(uuid4()))
     student_id= Column(String(50),ForeignKey('students.id'))
     consultant_id=Column(String(50), ForeignKey('consultants.id'))
@@ -56,11 +58,13 @@ class Consultation(Base):
     notes=Column(Text) # consultation notes
 
     # Relationship
-    students=relationship('Student', back_populates='consult')
+    student=relationship('Student', back_populates='consult')
 
 
 # Tracks payments made by students for consultancy services or application fees.
 class Payment(Base):
+
+    __tablename__ = 'payments'
     id = Column(String(36), primary_key=True, default=lambda:str(uuid4()))
     student_id = Column(String(50), ForeignKey('students.id'))
     amount=Column(Integer,nullable=False)
@@ -73,6 +77,8 @@ class Payment(Base):
     students= relationship('Student', back_populates='payment')
 
 class Consultant(Base):
+    __tablename__ = 'consultants'
+
     id=Column(String(36), primary_key=True, default=lambda:str(uuid4()))
     user_id= Column(String(50), ForeignKey('users.id'))
     first_name=Column(String(100),nullable=False)
@@ -106,7 +112,7 @@ class Program(Base):
     __tablename__ = 'programs'
 
     id=Column(String(36), primary_key=True, default=lambda:str(uuid4()))
-    university_id=Column(String(36), ForeignKey('University.id'))
+    university_id=Column(String(36), ForeignKey('universities.id'))
     program_name=Column(String(100))
     program_level=Column(String(50))
     duration=Column(Integer)
@@ -123,8 +129,8 @@ class Application(Base):
     __tablename__ = 'applications'
 
     id=Column(String(36), primary_key=True, default=lambda:str(uuid4()))
-    student_id = Column(String(50), ForeignKey('Student.id'))
-    university_id=Column(String(36), ForeignKey('University.id'))
+    student_id = Column(String(50), ForeignKey('students.id'))
+    university_id=Column(String(36), ForeignKey('universities.id'))
     status=Column(String(30))
     submission_date=Column(DateTime)
     decision_date = Column(DateTime)
