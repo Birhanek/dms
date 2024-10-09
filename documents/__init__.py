@@ -32,8 +32,10 @@ def create_app():
    
     #  local imports typically controllers
     from .auth import auth
+    from .student import student
     #  Registering those controllers in to the app
     app.register_blueprint(auth,url_prefix='/')
+    app.register_blueprint(student,url_prefix='/student')
     from .models import User
     
     create_database(app)
